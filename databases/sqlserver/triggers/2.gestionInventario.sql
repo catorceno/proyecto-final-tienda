@@ -1,0 +1,50 @@
+USE Tienda
+GO
+
+-- si sirve
+CREATE TRIGGER trg_calcularPrecioDescuento
+ON INVENTARIO
+AFTER UPDATE
+AS
+BEGIN
+	UPDATE inv
+	SET PrecioDescuento =
+		CASE WHEN i.DescuentoID IS NULL THEN NULL
+		ELSE i.Precio - (i.Precio * ds.Porcentaje) / 100
+		END
+	FROM INVENTARIO inv
+	INNER JOIN inserted i ON inv.ProductoID = i.ProductoID
+	LEFT JOIN deleted d   ON inv.ProductoID = d.ProductoID
+	LEFT JOIN DESCUENTOS ds ON i.DescuentoID = ds.DescuentoID
+	WHERE (d.DescuentoID IS NULL     AND i.DescuentoID IS NOT NULL)
+	   OR (d.DescuentoID IS NOT NULL AND i.DescuentoID IS NOT NULL AND d.DescuentoID <> i.DescuentoID)
+	   OR (d.DescuentoID IS NOT NULL AND i.DescuentoID IS NULL)
+	   OR (i.PrecioDescuento IS NOT NULL AND i.Precio <> d.Precio)
+END;
+
+-- si sirve
+CREATE TRIGGER trg_calcularStockDisponible
+ON PRODUCTOS
+AFTER INSERT
+AS
+BEGIN
+	UPDATE inv
+	SET Stock = (SELECT COUNT(*) 
+				 FROM PRODUCTOS p 
+				 WHERE inv.ProductoID = p.ProductoID
+				 AND p.Estado = 'Disponible')
+	FROM INVENTARIO inv
+END;
+
+CREATE TRIGGER trg_calcularStockDisponibleAfterUpdate
+ON PRODUCTOS
+AFTER UPDATE
+AS
+BEGIN
+	UPDATE inv
+	SET Stock = (SELECT COUNT(*) 
+				 FROM PRODUCTOS p 
+				 WHERE inv.ProductoID = p.ProductoID
+				 AND p.Estado = 'Disponible')
+	FROM INVENTARIO inv
+END;

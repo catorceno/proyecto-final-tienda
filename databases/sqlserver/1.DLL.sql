@@ -45,18 +45,119 @@ CONSTRAINT chk_TelefonoClientes CHECK (Telefono BETWEEN 10000000 AND 99999999)
 
 -- 5.Tiendas
 CREATE TABLE TIENDAS(
-TiendaID INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
-CategoriaID INT NOT NULL,
-UserID   INT		  NOT NULL,
-Nombre   NVARCHAR(50) NOT NULL,
+TiendaID       INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
+UserID         INT		  NOT NULL,
+CategoriaID    INT		  NOT NULL,
+Nombre         NVARCHAR(50) NOT NULL,
 NombreJuridico NVARCHAR(50) NOT NULL UNIQUE,
-NIT      INT		  NOT NULL UNIQUE,
-Telefono INT		  NOT NULL,
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
+NIT            INT		  NOT NULL UNIQUE,
+Telefono       INT		  NOT NULL,
+ModifiedDate   DATETIME   NOT NULL DEFAULT GETDATE(),
 FOREIGN KEY (UserID) REFERENCES USERS(UserID),
 FOREIGN KEY (CategoriaID) REFERENCES CATEGORIAS(CategoriaID),
 CONSTRAINT chk_TelefonoTiendas CHECK (Telefono BETWEEN 10000000 AND 99999999),
 CONSTRAINT chk_NitTiendas CHECK (NIT BETWEEN 100000000 AND 999999999)
+);
+
+--------------- GESTIÓN DE INVENTARIO ---------------
+-- 10.Descuentos
+CREATE TABLE DESCUENTOS(
+DescuentoID  INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
+TiendaID     INT		  NOT NULL,
+Nombre       NVARCHAR(50) NOT NULL UNIQUE,
+Porcentaje   INT		  NOT NULL,
+StartDate    DATETIME	  NOT NULL,
+EndDate      DATETIME	  NULL,
+ModifiedDate DATETIME     NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (TiendaID) REFERENCES TIENDAS(TiendaID),
+CONSTRAINT chk_PorcentajeDescuentos CHECK(Porcentaje BETWEEN 1 AND 100),
+CONSTRAINT chk_EndDateDescuentos CHECK(EndDate > StartDate)
+);
+
+-- 11.Inventario
+CREATE TABLE INVENTARIO(
+ProductoID		INT			  NOT NULL PRIMARY KEY IDENTITY(1,1),
+TiendaID		INT			  NOT NULL,
+SubcategoriaID  INT			  NOT NULL,
+DescuentoID		INT			  NULL,
+Nombre			NVARCHAR(50)  NOT NULL UNIQUE,
+Precio			DECIMAL(20,2) NOT NULL, -- trigger, cambiar si se aplica o quita un DescuentoID
+PrecioDescuento DECIMAL(20,2),
+Stock			INT DEFAULT(0),
+ModifiedDate	DATETIME	  NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (TiendaID) REFERENCES TIENDAS(TiendaID),
+FOREIGN KEY (DescuentoID) REFERENCES DESCUENTOS(DescuentoID),
+FOREIGN KEY (SubcategoriaID) REFERENCES SUBCATEGORIAS(SubcategoriaID),
+CONSTRAINT chk_PrecioInventario CHECK(Precio > 0),
+CONSTRAINT chk_StockInventario CHECK(Stock >= 0),
+);
+
+-- 12.Productos
+CREATE TABLE PRODUCTOS(
+ItemID		 INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+Codigo       INT NOT NULL,
+ProductoID   INT NOT NULL,
+Estado       NVARCHAR(20) NOT NULL DEFAULT('Disponible'),
+ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (ProductoID) REFERENCES INVENTARIO(ProductoID),
+CONSTRAINT chk_EstadoItem CHECK(Estado IN ('Disponible', 'Vendido'))
+);
+
+--------------- GESTIÓN DE VENTAS ---------------
+-- Direcciones
+CREATE TABLE DIRECCIONES(
+DireccionID INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
+Barrio NVARCHAR(50)   NOT NULL,
+Calle NVARCHAR(50)    NOT NULL,
+Numero INT			  NOT NULL,
+ModifiedDate DATETIME NOT NULL DEFAULT GETDATE()
+);
+
+-- Cliente-Direccion
+CREATE TABLE CLIENTE_DIRECCION(
+ClienteDireccionID INT NOT NULL PRIMARY KEY IDENTITY(1,1), -- quitar primary key si es innecesario
+ClienteID    INT       NOT NULL,
+DireccionID  INT       NOT NULL,
+ModifiedDate DATETIME  NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID),
+FOREIGN KEY (DireccionID) REFERENCES DIRECCIONES(DireccionID)
+);
+
+-- Compras
+CREATE TABLE COMPRAS(
+CompraID       INT		     NOT NULL PRIMARY KEY IDENTITY(1,1),
+ClienteID      INT			 NOT NULL,
+DireccionID    INT           NOT NULL,
+Subtotal       DECIMAL(20,2) NOT NULL,
+ServiceFee     DECIMAL(20,2) NOT NULL,
+Total          DECIMAL(20,2) NOT NULL,
+ModifiedDate   DATETIME      NOT NULL DEFAULT GETDATE(),
+FOREIGN (ClienteID) REFERENCES CLIENTES(ClienteID),
+FOREIGN KEY (DireccionID) REFERENCES DIRECCIONES(DireccionID)
+);
+
+-- Ventas
+CREATE TABLE VENTAS(
+VentaID		   INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+CompraID	   INT NOT NULL,
+ProductoID	   INT NOT NULL,
+Cantidad       INT NOT NULL,
+PrecioUnitario DECIMAL(20,2) NOT NULL,
+OrderDate	   DATETIME NOT NULL,
+ShipDate	   DATETIME NOT NULL,
+ModifiedDate   DATETIME NOT NULL DEFAULT GETDATE(),
+FOREIGN (CompraID) REFERENCES COMPRAS(CompraID),
+FOREIGN (ProductoID) REFERENCES INVENTARIO(ProductoID)
+);
+
+-- Detalle de Venta
+CREATE TABLE DETALLE_VENTA(
+DetalleVentaID INT     NOT NULL PRIMARY KEY IDENTITY(1,1),
+VentaID        INT     NOT NULL,
+ItemID         INT     NOT NULL,
+ModifiedDate  DATETIME NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (VentaID) REFERENCES VENTAS(VentaID),
+FOREIGN KEY (ItemID) REFERENCES PRODUCTOS(ItemID)
 );
 
 --------------- GESTIÓN DE PAGOS ---------------
@@ -105,106 +206,7 @@ FacturaID		 INT	  NOT NULL,
 ModifiedDate	 DATETIME NOT NULL DEFAULT GETDATE(),
 FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID),
 FOREIGN KEY (FacturaID) REFERENCES DATOS_FACTURA(FacturaID)
-);
-
---------------- GESTIÓN DE INVENTARIO ---------------
--- 10.Descuentos
-CREATE TABLE DESCUENTOS(
-DescuentoID  INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
-TiendaID     INT		  NOT NULL,
-Nombre       NVARCHAR(50) NOT NULL UNIQUE,
-Porcentaje   INT		  NOT NULL,
-StartDate    DATETIME	  NOT NULL,
-EndDate      DATETIME	  NULL,
-ModifiedDate DATETIME     NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (TiendaID) REFERENCES TIENDAS(TiendaID),
-CONSTRAINT chk_PorcentajeDescuentos CHECK(Porcentaje BETWEEN 1 AND 100),
-CONSTRAINT chk_EndDateDescuentos CHECK(EndDate > StartDate)
-);
-
--- 11.Inventario
-CREATE TABLE INVENTARIO(
-ProductoID		INT			  NOT NULL PRIMARY KEY IDENTITY(1,1),
-TiendaID		INT			  NOT NULL,
-SubcategoriaID  INT			  NOT NULL,
-DescuentoID		INT			  NULL,
-Nombre			NVARCHAR(50)  NOT NULL UNIQUE,
-Precio			DECIMAL(20,2) NOT NULL, -- trigger, cambiar si se aplica o quita un DescuentoID
-PrecioDescuento DECIMAL(20,2),
-Stock			INT DEFAULT(0),
-ModifiedDate	DATETIME	  NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (TiendaID) REFERENCES TIENDAS(TiendaID),
-FOREIGN KEY (DescuentoID) REFERENCES DESCUENTOS(DescuentoID),
-FOREIGN KEY (SubcategoriaID) REFERENCES SUBCATEGORIAS(SubcategoriaID),
-CONSTRAINT chk_PrecioInventario CHECK(Precio > 0),
-CONSTRAINT chk_StockInventario CHECK(Stock >= 0),
-);
-
--- 12.Productos
-CREATE TABLE PRODUCTOS(
-ItemID		 INT NOT NULL PRIMARY KEY, -- IDENTITY(1,1)
-ProductoID   INT NOT NULL,
-Estado       NVARCHAR(20) NOT NULL DEFAULT('Disponible'),
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (ProductoID) REFERENCES INVENTARIO(ProductoID),
-CONSTRAINT chk_EstadoItem CHECK(Estado IN ('Disponible', 'Vendido'))
-);
-
--- Direcciones
-CREATE TABLE DIRECCIONES(
-DireccionID INT		NOT NULL PRIMARY KEY IDENTITY(1,1),
-ClienteID INT		NOT NULL,
-Barrio NVARCHAR(50) NOT NULL,
-Calle NVARCHAR(50)  NOT NULL,
-Numero INT			NOT NULL,
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID)
-);
-
--- Carritos
-CREATE TABLE CARRITOS(
-CarritoID    INT NOT NULL PRIMARY KEY IDENTITY(1,1),
-ClienteID    INT NOT NULL,
-Subtotal	 DECIMAL(20,2), -- check >= precio unitario
-ServiceFee   DECIMAL(5,2) NOT NULL DEFAULT 2.0,
-Total		 DECIMAL(20,2),
-Estado		 NVARCHAR(20) NULL DEFAULT 'Abierto',
-CreatedDate  DATETIME NOT NULL DEFAULT GETDATE(),
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID),
-CONSTRAINT chk_EstadoCarritos CHECK(Estado IN('Abierto', 'Pagado', 'Cancelado')),
-CONSTRAINT chk_ServiceFeeCarritos CHECK(ServiceFee >= 0),
-CONSTRAINT chk_TotalCarritos CHECK(Total >= Subtotal)
-);
-
--- Items de Carrito
-CREATE TABLE ITEMS_CARRITO(
-ItemCarritoID  INT NOT NULL PRIMARY KEY IDENTITY(1,1),
-CarritoID	   INT NOT NULL,
-ProductoID	   INT NOT NULL,
-Cantidad       INT NOT NULL, -- check <= Stock
-PrecioUnitario DECIMAL(20,2),
-AddedDate      DATETIME NOT NULL DEFAULT GETDATE(),
-ModifiedDate   DATETIME NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (CarritoID) REFERENCES CARRITOS(CarritoID),
-FOREIGN KEY (ProductoID) REFERENCES INVENTARIO(ProductoID),
-CONSTRAINT chk_CantidadItemsCarrito CHECK(Cantidad >= 0)
-);
-
--- Pedidos
-CREATE TABLE PEDIDOS(
-PedidoID	 INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
-DireccionID  INT		  NOT NULL,
-CarritoID	 INT		  NOT NULL, --enviado
-Estado		 NVARCHAR(20) NOT NULL DEFAULT 'Enviado',
-OrderDate    DATETIME     NOT NULL DEFAULT GETDATE(), -- >= CreatedDate
-ShipDate     DATETIME, -- cuando Estado pasa de Enviado a Entregado, usar un Job
-ModifiedDate DATETIME     NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (DireccionID) REFERENCES DIRECCIONES(DireccionID),
-FOREIGN KEY (CarritoID) REFERENCES CARRITOS(CarritoID),
-CONSTRAINT chk_EstadoPedidos CHECK(Estado IN('Enviado', 'Entregado', 'Cancelado')),
-CONSTRAINT chk_ShipDatePedidos CHECK(ShipDate >= OrderDate)
-);
+); 
 
 -- Pagos
 CREATE TABLE PAGOS(
@@ -219,22 +221,12 @@ Estado		 AS (
 				ELSE 'Recibido'
 				END
 			 ) PERSISTED,
-Fecha		 DATETIME	   NOT NULL DEFAULT GETDATE(), -- >= OrderDate
+Fecha		 DATETIME	   NOT NULL DEFAULT GETDATE(),
 ModifiedDate DATETIME	   NOT NULL DEFAULT GETDATE(),
 FOREIGN KEY (PedidoID) REFERENCES PEDIDOS(PedidoID),
 FOREIGN KEY (ClienteTarjetaID) REFERENCES CLIENTE_TARJETA(ClienteTarjetaID),
 FOREIGN KEY (ClienteFacturaID) REFERENCES CLIENTE_FACTURA(ClienteFacturaID),
 CONSTRAINT chk_MetodoPago CHECK(MetodoPago IN('Tarjeta', 'QR', 'Efectivo')),
 CONSTRAINT chk_MontoPagos CHECK(Monto > 0),
-CONSTRAINT chk_EstadoPagos CHECK(Estado IN('Contraentrega', 'Recibido', 'Devuelto'))
-);
-
--- Detalle Pedido
-CREATE TABLE DETALLE_PEDIDO(
-DetallePedidoID INT NOT NULL PRIMARY KEY IDENTITY(1,1),
-PedidoID INT NOT NULL,
-ItemID INT NOT NULL,
-ModifiedDate DATETIME	   NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (PedidoID) REFERENCES PEDIDOS(PedidoID),
-FOREIGN KEY (ItemID) REFERENCES PRODUCTOS(ItemID)
+CONSTRAINT chk_EstadoPagos CHECK(Estado IN('Contraentrega', 'Recibido'))
 );

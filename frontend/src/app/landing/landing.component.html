@@ -1,0 +1,8 @@
+<h2>hey jude</h2>
+@for (weather of weathers; track $index){
+  <div>
+    <div>Fecha: {{ weather.date }} </div>
+    <div>Temperatura: {{ weather.temperatureC }} </div>
+    <div>Resumen: {{ weather.summary }} </div>
+  </div>
+}

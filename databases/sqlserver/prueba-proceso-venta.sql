@@ -1,0 +1,106 @@
+CREATE DATABASE ProcesoVenta
+GO
+USE ProcesoVenta
+GO
+
+CREATE TABLE TIENDAS(
+TiendaID       INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
+Nombre         NVARCHAR(50) NOT NULL,
+NombreJuridico NVARCHAR(50) NOT NULL UNIQUE,
+NIT            INT		  NOT NULL UNIQUE,
+Telefono       INT		  NOT NULL,
+ModifiedDate   DATETIME   NOT NULL DEFAULT GETDATE(),
+CONSTRAINT chk_TelefonoTiendas CHECK (Telefono BETWEEN 10000000 AND 99999999),
+CONSTRAINT chk_NitTiendas CHECK (NIT BETWEEN 100000000 AND 999999999)
+);
+
+CREATE TABLE DESCUENTOS(
+DescuentoID  INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
+TiendaID     INT		  NOT NULL,
+Nombre       NVARCHAR(50) NOT NULL UNIQUE,
+Porcentaje   INT		  NOT NULL,
+StartDate    DATETIME	  NOT NULL,
+EndDate      DATETIME	  NULL,
+ModifiedDate DATETIME     NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (TiendaID) REFERENCES TIENDAS(TiendaID),
+CONSTRAINT chk_PorcentajeDescuentos CHECK(Porcentaje BETWEEN 1 AND 100),
+CONSTRAINT chk_EndDateDescuentos CHECK(EndDate > StartDate)
+);
+
+CREATE TABLE INVENTARIO(
+ProductoID		INT			  NOT NULL PRIMARY KEY IDENTITY(1,1),
+TiendaID		INT			  NOT NULL,
+DescuentoID		INT			  NULL,
+Nombre			NVARCHAR(50)  NOT NULL UNIQUE,
+Precio			DECIMAL(20,2) NOT NULL, -- trigger, cambiar si se aplica o quita un DescuentoID
+PrecioDescuento DECIMAL(20,2),
+Stock			INT DEFAULT(0),
+ModifiedDate	DATETIME	  NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (TiendaID) REFERENCES TIENDAS(TiendaID),
+FOREIGN KEY (DescuentoID) REFERENCES DESCUENTOS(DescuentoID),
+CONSTRAINT chk_PrecioInventario CHECK(Precio > 0),
+CONSTRAINT chk_StockInventario CHECK(Stock >= 0),
+);
+
+CREATE TABLE PRODUCTOS(
+ItemID		 INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+ProductoID   INT NOT NULL,
+Codigo       INT NOT NULL,
+Estado       NVARCHAR(20) NOT NULL DEFAULT('Disponible'),
+ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (ProductoID) REFERENCES INVENTARIO(ProductoID),
+CONSTRAINT chk_EstadoItem CHECK(Estado IN ('Disponible', 'Vendido'))
+);
+
+
+------- clases en el backend
+CREATE TABLE Carrito(
+CarritoID INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+Subtotal INT NOT NULL,
+ServiceFee INT NOT NULL,
+Total INT NOT NULL,
+Estado NVARCHAR(20) NOT NULL DEFAULT 'Abierto' CHECK (Estado In ('Abierto', 'Enviado'))
+);
+
+CREATE TABLE DetalleCarrito(
+DetalleCarritoID INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+CarritoID INT NOT NULL,
+ProductoID INT NOT NULL,
+Cantidad INT NOT NULL,
+PrecioUnitario DECIMAL(20,2) NOT NULL,
+FOREIGN KEY (CarritoID) REFERENCES Carrito(CarritoID),
+FOREIGN KEY (ProductoID) REFERENCES INVENTARIO(ProductoID)
+);
+
+-- en ventas se debe guardar los datos de detalle carrito para poder hacer joins
+CREATE TABLE COMPRAS(
+CompraID       INT		     NOT NULL PRIMARY KEY IDENTITY(1,1),
+ClienteID      INT			 NOT NULL,
+Subtotal       DECIMAL(20,2) NOT NULL,
+ServiceFee     DECIMAL(20,2) NOT NULL,
+Total          DECIMAL(20,2) NOT NULL,
+ModifiedDate   DATETIME      NOT NULL DEFAULT GETDATE()
+-- FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID)
+);
+
+CREATE TABLE VENTAS(
+VentaID		   INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+CompraID	   INT NOT NULL,
+ProductoID	   INT NOT NULL,
+Cantidad       INT NOT NULL,
+PrecioUnitario DECIMAL(20,2) NOT NULL,
+OrderDate	   DATETIME NOT NULL,
+ShipDate	   DATETIME NOT NULL,
+ModifiedDate   DATETIME NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (CompraID) REFERENCES COMPRAS(CompraID),
+FOREIGN KEY (ProductoID) REFERENCES INVENTARIO(ProductoID)
+);
+
+CREATE TABLE DETALLE_VENTA(
+DetalleVentaID INT NOT NULL PRIMARY KEY IDENTITY(1,1),
+VentaID INT NOT NULL,
+ItemID INT NOT NULL,
+ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
+FOREIGN KEY (VentaID) REFERENCES VENTAS(VentaID),
+FOREIGN KEY (ItemID) REFERENCES PRODUCTOS(ItemID)
+);

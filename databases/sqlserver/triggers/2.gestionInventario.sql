@@ -1,7 +1,22 @@
-USE Tienda
+USE Marketplace
 GO
 
--- si sirve
+-- 1. si sirve
+CREATE TRIGGER trg_calcularStockInsertItem
+ON PRODUCTOS
+AFTER INSERT
+AS
+BEGIN
+	UPDATE inv
+	SET Stock = (SELECT COUNT(*) 
+				 FROM PRODUCTOS p 
+				 WHERE inv.ProductoID = p.ProductoID
+				 AND p.Estado = 'Disponible')
+	FROM INVENTARIO inv
+END;
+
+
+-- 2. si sirve
 CREATE TRIGGER trg_calcularPrecioDescuento
 ON INVENTARIO
 AFTER UPDATE
@@ -22,21 +37,8 @@ BEGIN
 	   OR (i.PrecioDescuento IS NOT NULL AND i.Precio <> d.Precio)
 END;
 
--- si sirve
-CREATE TRIGGER trg_calcularStockDisponible
-ON PRODUCTOS
-AFTER INSERT
-AS
-BEGIN
-	UPDATE inv
-	SET Stock = (SELECT COUNT(*) 
-				 FROM PRODUCTOS p 
-				 WHERE inv.ProductoID = p.ProductoID
-				 AND p.Estado = 'Disponible')
-	FROM INVENTARIO inv
-END;
-
-CREATE TRIGGER trg_calcularStockDisponibleAfterUpdate
+-- 3.
+CREATE TRIGGER trg_calcularStockAfterVenta
 ON PRODUCTOS
 AFTER UPDATE
 AS

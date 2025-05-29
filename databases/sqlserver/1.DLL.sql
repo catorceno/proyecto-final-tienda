@@ -1,24 +1,7 @@
-CREATE DATABASE Tienda
+CREATE DATABASE Marketplace
 GO
-USE Tienda
+USE Marketplace
 GO
-
---------------- TABLAS FIJAS - CATEGORIAS ---------------
--- 1.Categorias Producto y Tiendas
-CREATE TABLE CATEGORIAS(
-CategoriaID INT       NOT NULL PRIMARY KEY IDENTITY(1,1),
-Nombre NVARCHAR(50)   NOT NULL UNIQUE,
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE()
-);
-
--- 2.Subcategorias Producto
-CREATE TABLE SUBCATEGORIAS(
-SubcategoriaID INT    NOT NULL PRIMARY KEY IDENTITY(1,1),
-CategoriaID INT       NOT NULL,
-Nombre NVARCHAR(50)   NOT NULL,
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (CategoriaID) REFERENCES CATEGORIAS(CategoriaID)
-);
 
 --------------- GESTION DE USUARIOS ---------------
 -- 3.Users
@@ -26,7 +9,7 @@ CREATE TABLE USERS(
 UserID   INT		   NOT NULL PRIMARY KEY IDENTITY(1,1),
 Correo   NVARCHAR(100) NOT NULL UNIQUE,
 Password NVARCHAR(200) NOT NULL,
-Tipo     NVARCHAR(20)  NOT NULL,
+Tipo     NVARCHAR(20)  NOT NULL, -- OJO: eliminar si es innecesario
 ModifiedDate DATETIME  NOT NULL DEFAULT GETDATE(),
 CONSTRAINT chk_UsersTipo CHECK (Tipo IN ('Cliente', 'Tienda'))
 );
@@ -60,7 +43,7 @@ CONSTRAINT chk_NitTiendas CHECK (NIT BETWEEN 100000000 AND 999999999)
 );
 
 --------------- GESTIÓN DE INVENTARIO ---------------
--- 10.Descuentos
+-- 6.Descuentos
 CREATE TABLE DESCUENTOS(
 DescuentoID  INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
 TiendaID     INT		  NOT NULL,
@@ -74,7 +57,7 @@ CONSTRAINT chk_PorcentajeDescuentos CHECK(Porcentaje BETWEEN 1 AND 100),
 CONSTRAINT chk_EndDateDescuentos CHECK(EndDate > StartDate)
 );
 
--- 11.Inventario
+-- 7.Inventario
 CREATE TABLE INVENTARIO(
 ProductoID		INT			  NOT NULL PRIMARY KEY IDENTITY(1,1),
 TiendaID		INT			  NOT NULL,
@@ -89,10 +72,10 @@ FOREIGN KEY (TiendaID) REFERENCES TIENDAS(TiendaID),
 FOREIGN KEY (DescuentoID) REFERENCES DESCUENTOS(DescuentoID),
 FOREIGN KEY (SubcategoriaID) REFERENCES SUBCATEGORIAS(SubcategoriaID),
 CONSTRAINT chk_PrecioInventario CHECK(Precio > 0),
-CONSTRAINT chk_StockInventario CHECK(Stock >= 0),
+CONSTRAINT chk_StockInventario CHECK(Stock >= 0)
 );
 
--- 12.Productos
+-- 8.Productos
 CREATE TABLE PRODUCTOS(
 ItemID		 INT NOT NULL PRIMARY KEY IDENTITY(1,1),
 Codigo       INT NOT NULL,
@@ -104,7 +87,7 @@ CONSTRAINT chk_EstadoItem CHECK(Estado IN ('Disponible', 'Vendido'))
 );
 
 --------------- GESTIÓN DE VENTAS ---------------
--- Direcciones
+-- 9.Direcciones
 CREATE TABLE DIRECCIONES(
 DireccionID INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
 Barrio NVARCHAR(50)   NOT NULL,
@@ -113,7 +96,7 @@ Numero INT			  NOT NULL,
 ModifiedDate DATETIME NOT NULL DEFAULT GETDATE()
 );
 
--- Cliente-Direccion
+-- 10.Cliente-Direccion
 CREATE TABLE CLIENTE_DIRECCION(
 ClienteDireccionID INT NOT NULL PRIMARY KEY IDENTITY(1,1), -- quitar primary key si es innecesario
 ClienteID    INT       NOT NULL,
@@ -123,34 +106,34 @@ FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID),
 FOREIGN KEY (DireccionID) REFERENCES DIRECCIONES(DireccionID)
 );
 
--- Compras
+-- 11.Compras
 CREATE TABLE COMPRAS(
 CompraID       INT		     NOT NULL PRIMARY KEY IDENTITY(1,1),
 ClienteID      INT			 NOT NULL,
 DireccionID    INT           NOT NULL,
-Subtotal       DECIMAL(20,2) NOT NULL,
-ServiceFee     DECIMAL(20,2) NOT NULL,
-Total          DECIMAL(20,2) NOT NULL,
+Subtotal       DECIMAL(20,2) NULL,
+ServiceFee     DECIMAL(4,2)  NOT NULL,
+Total          DECIMAL(20,2) NULL,
 ModifiedDate   DATETIME      NOT NULL DEFAULT GETDATE(),
-FOREIGN (ClienteID) REFERENCES CLIENTES(ClienteID),
+FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID),
 FOREIGN KEY (DireccionID) REFERENCES DIRECCIONES(DireccionID)
 );
 
--- Ventas
+-- 12.Ventas
 CREATE TABLE VENTAS(
 VentaID		   INT NOT NULL PRIMARY KEY IDENTITY(1,1),
 CompraID	   INT NOT NULL,
 ProductoID	   INT NOT NULL,
 Cantidad       INT NOT NULL,
 PrecioUnitario DECIMAL(20,2) NOT NULL,
-OrderDate	   DATETIME NOT NULL,
-ShipDate	   DATETIME NOT NULL,
+OrderDate	   DATETIME NOT NULL DEFAULT GETDATE(),
+ShipDate	   DATETIME NOT NULL DEFAULT GETDATE(),
 ModifiedDate   DATETIME NOT NULL DEFAULT GETDATE(),
-FOREIGN (CompraID) REFERENCES COMPRAS(CompraID),
-FOREIGN (ProductoID) REFERENCES INVENTARIO(ProductoID)
+FOREIGN KEY (CompraID) REFERENCES COMPRAS(CompraID),
+FOREIGN KEY (ProductoID) REFERENCES INVENTARIO(ProductoID)
 );
 
--- Detalle de Venta
+-- 13.Detalle de Venta
 CREATE TABLE DETALLE_VENTA(
 DetalleVentaID INT     NOT NULL PRIMARY KEY IDENTITY(1,1),
 VentaID        INT     NOT NULL,
@@ -161,7 +144,7 @@ FOREIGN KEY (ItemID) REFERENCES PRODUCTOS(ItemID)
 );
 
 --------------- GESTIÓN DE PAGOS ---------------
--- 6.Tarjetas
+-- 14.Tarjetas
 CREATE TABLE TARJETAS(
 TarjetaID	  INT		   NOT NULL PRIMARY KEY IDENTITY(1,1),
 Red			  NVARCHAR(20) NOT NULL,
@@ -176,10 +159,8 @@ CONSTRAINT chk_NumeroTarjetas  CHECK(Numero BETWEEN 1000000000000000 AND 9999999
 CONSTRAINT chk_CvcTarjetas     CHECK(CVC BETWEEN 100 AND 999),
 CONSTRAINT uq_TitulaNumeroCVCTarjetas UNIQUE(NombreTitular, Numero, CVC)
 );
-DROP TABLE CLIENTE_TARJETA
-DROP TABLE CLIENTE_FACTURA
 
--- 7.Cliente-Tarjeta
+-- 15.Cliente-Tarjeta
 CREATE TABLE CLIENTE_TARJETA(
 ClienteTarjetaID INT	  NOT NULL PRIMARY KEY IDENTITY(1,1),
 ClienteID	     INT	  NOT NULL,
@@ -189,7 +170,7 @@ FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID),
 FOREIGN KEY (TarjetaID) REFERENCES TARJETAS(TarjetaID)
 );
 
--- 8.Facturas
+-- 16.Facturas
 CREATE TABLE DATOS_FACTURA(
 FacturaID	 INT		  NOT NULL PRIMARY KEY IDENTITY(1,1),
 RazonSocial  NVARCHAR(50) NOT NULL,
@@ -198,7 +179,7 @@ ModifiedDate DATETIME	  NOT NULL DEFAULT GETDATE(),
 CONSTRAINT chk_NitCiFacturas CHECK(NitCi BETWEEN 1000000 AND 999999999)
 );
 
--- 9.Cliente-Factura
+-- 17.Cliente-Factura
 CREATE TABLE CLIENTE_FACTURA(
 ClienteFacturaID INT	  NOT NULL PRIMARY KEY IDENTITY(1,1),
 ClienteID		 INT	  NOT NULL,
@@ -208,25 +189,19 @@ FOREIGN KEY (ClienteID) REFERENCES CLIENTES(ClienteID),
 FOREIGN KEY (FacturaID) REFERENCES DATOS_FACTURA(FacturaID)
 ); 
 
--- Pagos
+-- 18.Pagos
 CREATE TABLE PAGOS(
 PagoID		 INT		   NOT NULL PRIMARY KEY IDENTITY(1,1),
-PedidoID	 INT		   NOT NULL,
-ClienteTarjetaID INT	   NULL,
+CompraID	 INT		   NOT NULL,
 ClienteFacturaID INT	   NOT NULL,
+ClienteTarjetaID INT	   NULL,
 MetodoPago   NVARCHAR(20)  NOT NULL,
 Monto		 DECIMAL(20,2) NOT NULL,
-Estado		 AS (
-				CASE WHEN MetodoPago = 'Efectivo' THEN 'Contraentrega'
-				ELSE 'Recibido'
-				END
-			 ) PERSISTED,
 Fecha		 DATETIME	   NOT NULL DEFAULT GETDATE(),
 ModifiedDate DATETIME	   NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (PedidoID) REFERENCES PEDIDOS(PedidoID),
+FOREIGN KEY (CompraID) REFERENCES COMPRAS(CompraID),
 FOREIGN KEY (ClienteTarjetaID) REFERENCES CLIENTE_TARJETA(ClienteTarjetaID),
 FOREIGN KEY (ClienteFacturaID) REFERENCES CLIENTE_FACTURA(ClienteFacturaID),
 CONSTRAINT chk_MetodoPago CHECK(MetodoPago IN('Tarjeta', 'QR', 'Efectivo')),
 CONSTRAINT chk_MontoPagos CHECK(Monto > 0),
-CONSTRAINT chk_EstadoPagos CHECK(Estado IN('Contraentrega', 'Recibido'))
 );

@@ -1,4 +1,4 @@
-USE Marketplace
+USE Tienda
 GO
 
 --------------- GESTION DE USUARIOS ---------------

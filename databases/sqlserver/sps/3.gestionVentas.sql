@@ -1,16 +1,20 @@
-USE Marketplace
+USE Tienda
 GO
 
 -- 1.
+
 ALTER PROCEDURE sp_procesoVenta
 @ClienteID      INT,
 @DireccionID    INT,
-@Subtotal       DECIMAL(20,2),
-@ServiceFee     DECIMAL(4,2),
-@Total          DECIMAL(20,2),
+@FacturaID      INT,
+@MetodoPago     NVARCHAR(20),
+@TarjetaID      INT,
 @ProductoID     INT,
 @Cantidad       INT,
-@PrecioUnitario DECIMAL(20,2)
+@PrecioUnitario DECIMAL(20,2),
+@Subtotal       DECIMAL(20,2),
+@ServiceFee     DECIMAL(4,2),
+@Total          DECIMAL(20,2)
 AS
 BEGIN
 	BEGIN TRY
@@ -19,6 +23,10 @@ BEGIN
 		VALUES (@ClienteID, @DireccionID, @Subtotal, @ServiceFee, @Total);
 		
 		DECLARE @CompraID INT = SCOPE_IDENTITY();
+
+		INSERT INTO PAGOS(CompraID, FacturaID, TarjetaID, MetodoPago, Monto)
+		VALUES (@CompraID, @FacturaID, @TarjetaID, @MetodoPago, @Total);
+
 		INSERT INTO VENTAS(CompraID, ProductoID, Cantidad, PrecioUnitario)
 		VALUES (@CompraID, @ProductoID, @Cantidad, @PrecioUnitario);
 
@@ -49,6 +57,79 @@ BEGIN
 	END CATCH
 END;
 
+-- para varios productos diferentes
+-- En tu base de datos Tienda:
+CREATE TYPE dbo.TablaItems AS TABLE
+(
+    ProductoID      INT         NOT NULL,
+    Cantidad        INT         NOT NULL,
+    PrecioUnitario  DECIMAL(20,2) NOT NULL
+);
+GO
+CREATE PROCEDURE usp_procesoVenta
+@ClienteID      INT,
+@DireccionID    INT,
+@FacturaID      INT,
+@MetodoPago     NVARCHAR(20),
+@TarjetaID      INT,
+@Items          dbo.TablaItems READONLY,
+@Subtotal       DECIMAL(20,2),
+@ServiceFee     DECIMAL(4,2),
+@Total          DECIMAL(20,2)
+AS
+BEGIN
+    INSERT INTO COMPRAS (ClienteID, DireccionID, ServiceFee)
+    VALUES (@ClienteID, @DireccionID, @ServiceFee);
+
+    DECLARE @CompraID = SCOPE_IDENTITY();
+
+    INSERT INTO VENTAS (CompraID, ProductoID, Cantidad, PrecioUnitario)
+    SELECT 
+        @CompraID,
+        ProductoID,
+        Cantidad,
+        PrecioUnitario
+    FROM @Items;
+
+	DECLARE @VentaID INT = SCOPE_IDENTITY();
+
+        DECLARE @Contador INT = 1;
+        DECLARE @ItemID INT;
+
+        WHILE @Contador <= @Cantidad
+        BEGIN
+            SELECT TOP 1
+                @ItemID = ItemID
+            FROM PRODUCTOS WITH (UPDLOCK, READPAST) -- para evitar deadlocks
+            WHERE ProductoID = @ProductoID
+              AND Estado = 'Disponible'
+            ORDER BY ItemID ASC;
+
+            INSERT INTO DETALLE_VENTA(VentaID, ItemID)
+            VALUES (@VentaID, @ItemID);
+
+            SET @Contador += 1;
+        END
+END
+
+-- 2.
+CREATE PROCEDURE sp_registrarNuevaDireccion
+@ClienteID INT,
+@Barrio NVARCHAR(50),
+@Calle NVARCHAR(50),
+@Numero INT
+BEGIN
+	BEGIN TRY
+	BEGIN TRANSACTION
+		INSERT INTO DIRECCIONES(Barrio, Calle, Numero)
+		VALUES(@Barrio, @Calle, @Numero);
+		
+		COMMIT TRANSACTION;
+	END TRY
+	BEGIN CATCH
+        ROLLBACK TRANSACTION;
+	END CATCH
+END;
 
 /*
 sp: sp_ (entradas desde el backend:

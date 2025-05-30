@@ -1,4 +1,4 @@
-USE Marketplace
+USE Tienda
 GO
 
 --------------- GESTION DE USUARIOS ---------------
@@ -31,26 +31,86 @@ EXEC sp_inicioSesion
 	@Password = 'spTienda123';
 
 --------------- GESTION DE INVENTARIO ---------------
--- 1. ... falta implementar ...
+-- 1.
+SELECT * FROM INVENTARIO
 EXEC sp_aplicarDescuentoAProducto
-    @TiendaID    = ,
-    @DescuentoID = ,
-    @ProductoID  = ;
+    @TiendaID    = 1,
+    @DescuentoID = 1,
+    @ProductoID  = 3;
 
 --------------- GESTION DE VENTAS ---------------
 -- 1.
+SELECT * FROM CLIENTES
+SELECT * FROM DIRECCIONES   WHERE ClienteID = 1
+SELECT * FROM DATOS_FACTURA WHERE ClienteID = 1
+SELECT * FROM TARJETAS      WHERE ClienteID = 1
+
+SELECT * FROM INVENTARIO
 SELECT * FROM COMPRAS 
 SELECT * FROM VENTAS 
-SELECT * FROM DETALLE_VENTA -- falta implementar aquí
+SELECT * FROM DETALLE_VENTA
+
+SELECT * FROM PRODUCTOS
 EXEC sp_procesoVenta 
-  @ClienteID      = 1, 
-  @DireccionID    = 1, 
-  @Subtotal       = 100.00, 
-  @ServiceFee     = 5.00, 
-  @Total          = 105.00, 
-  @ProductoID     = 2, 
-  @Cantidad       = 1, 
-  @PrecioUnitario = 100.00;
+	@ClienteID		= 1,
+	@DireccionID	= 1,
+	@FacturaID		= 1,
+	@MetodoPago		= 'Efectivo',
+	@TarjetaID		= NULL,
+	@ProductoID		= 1,
+	@Cantidad       = 1,
+	@PrecioUnitario = 50,
+	@Subtotal		= 50,
+	@ServiceFee		= 5,
+	@Total			= 55;
+SELECT * FROM INVENTARIO
+SELECT * FROM PRODUCTOS
+
+
+
+DECLARE @ItemsCarrito dbo.TablaItems;
+INSERT INTO @ItemsCarrito (ProductoID, Cantidad, PrecioUnitario) VALUES
+	(, , ),
+	(, , ),
+	(, , );
+EXEC usp_procesoVenta
+	@ClienteID		= 1,
+	@DireccionID	= 1,
+	@FacturaID		= 1,
+	@MetodoPago		= 'Efectivo',
+	@TarjetaID		= NULL,
+	@Items          = @ItemsCarrito,
+	@Subtotal		= 50,
+	@ServiceFee		= 5,
+	@Total			= 55;
+
+
+--------------- GESTION DE PAGOS ---------------
+-- 1.
+SELECT * FROM DIRECCIONES 
+EXEC sp_registrarDireccion
+@ClienteID = ,
+@Barrito ,
+@Calle ,
+@Numero 
+
+-- 2.
+SELECT * FROM TARJETAS 
+EXEC sp_registrarTarjeta
+@ClienteID =,
+@Red,
+@NombreTitular,
+@Numero,
+@CVC,
+@ExpDate
+
+-- 3.
+SELECT * FROM DATOS_FACTURA 
+EXEC sp_registrarDatosFactura
+@ClienteID = ,
+@RazonSocial ,
+@NitCi 
+
 
 --
 CREATE PROCEDURE sp_

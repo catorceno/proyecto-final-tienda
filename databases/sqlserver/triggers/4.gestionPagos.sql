@@ -1,0 +1,19 @@
+USE Tienda
+GO
+
+-- 1.
+CREATE TRIGGER trg_registrarTarjeta
+ON TARJETAS
+INSTEAD OF INSERT
+AS
+	
+BEGIN
+END;
+
+-- 1.
+CREATE TRIGGER trg_registrarDatosFactura
+ON DATOS_FACTURA
+INSTEAD OF INSERT
+AS
+BEGIN
+END;

@@ -1,4 +1,4 @@
-USE Marketplace
+USE Tienda
 GO
 
 --------------- GESTION DE USUARIOS ---------------
@@ -22,7 +22,7 @@ VALUES
 	(4, 1, 'tiendaTec2', 'tiendaTec2 SA', 222222222, 22222222), -- 2
 	(5, 1, 'tiendaTec3', 'tiendaTec3 SA', 333333333, 33333333); -- 3
 
---------------- GESTI�N DE INVENTARIO ---------------
+--------------- GESTIÓN DE INVENTARIO ---------------
 SELECT * FROM DESCUENTOS 
 SELECT * FROM INVENTARIO 
 SELECT * FROM PRODUCTOS 
@@ -44,7 +44,6 @@ VALUES
 	(113, 1),
 	(114, 1),
 	(115, 1),
-	(116, 1),
 	(121, 2), -- iphone2
 	(122, 2),
 	(123, 2),
@@ -73,21 +72,13 @@ VALUES
 
 --------------- GESTI�N DE VENTAS ---------------
 SELECT * FROM DIRECCIONES 
-SELECT * FROM CLIENTE_DIRECCION 
-INSERT INTO DIRECCIONES(Barrio, Calle, Numero)
+INSERT INTO DIRECCIONES(ClienteID, Barrio, Calle, Numero)
 VALUES 
-	('barrio1', 'calle1', 11),
-	('barrio2', 'calle2', 12),
-	('barrio3', 'calle3', 13),
-	('barrio4', 'calle4', 21),
-	('barrio5', 'calle5', 22);
-INSERT INTO CLIENTE_DIRECCION(ClienteID, DireccionID)
-VALUES 
-	(1, 1),
-	(1, 2),
-	(1, 3),
-	(2, 4),
-	(2, 5);
+	(1, 'barrio1', 'calle1', 11),
+	(1, 'barrio2', 'calle2', 12),
+	(1, 'barrio3', 'calle3', 13),
+	(2, 'barrio4', 'calle4', 21),
+	(2, 'barrio5', 'calle5', 22);
 
 SELECT * FROM COMPRAS 
 SELECT * FROM VENTAS 
@@ -102,14 +93,21 @@ EXEC sp_procesoVenta
   @ProductoID     = 2, 
   @Cantidad       = 1, 
   @PrecioUnitario = 100.00;
-INSERT INTO DETALLE_VENTA(VentaID, ItemID)VALUES (1, 7); -- ya no sera necesario, despues de terminar de implementar el sp
 
---------------- GESTI�N DE PAGOS ---------------
+--------------- GESTIÓN DE PAGOS ---------------
 SELECT * FROM TARJETAS 
-SELECT * FROM CLIENTE_TARJETA 
 SELECT * FROM DATOS_FACTURA 
-SELECT * FROM CLIENTE_FACTURA 
--- IMPLEMENTAR sp : registro de una Tarjeta
--- IMPLEMENTAR sp : registro de datos para facturas
-
 SELECT * FROM PAGOS 
+INSERT INTO TARJETAS(ClienteID, Red, NombreTitular, Numero, ExpDate, CVC)
+VALUES 
+	(1, 'Visa', 'TarjetaCliente1', 1234123412341234, '2025-06-10', 123),
+	(1, 'MasterCard', 'Tarjeta2Cliente1', 1234123412341235, '2025-06-10', 124),
+	(2, 'Visa', 'TarjetaCliente2', 1234123412341234, '2025-06-10', 123);
+INSERT INTO DATOS_FACTURA(ClienteID, RazonSocial, NitCi)
+VALUES 
+	(1, 'Cliente1Factura', 1111111),
+	(2, 'Cliente2Factura', 2222222);
+INSERT INTO PAGOS(CompraID, FacturaID, TarjetaID, MetodoPago, Monto)
+VALUES 
+	(1, 1, 1, 'Tarjeta', 305),
+	(2, 2, NULL, 'Efectivo', 205);

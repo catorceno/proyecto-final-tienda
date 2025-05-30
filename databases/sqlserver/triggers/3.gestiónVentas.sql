@@ -1,4 +1,4 @@
-USE Marketplace 
+USE Tienda 
 GO
 
 -- 1.Después de insertar items a la tabla DetalleVenta, marcar como 'Vendido' en la tabla Productos

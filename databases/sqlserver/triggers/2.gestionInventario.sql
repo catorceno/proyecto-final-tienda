@@ -1,4 +1,4 @@
-USE Marketplace
+USE Tienda
 GO
 
 -- 1.Calcular Stock después de insertar items en la tabla Productos 
@@ -21,6 +21,9 @@ ON INVENTARIO
 AFTER UPDATE
 AS
 BEGIN
+	IF NOT ( UPDATE(DescuentoID) OR UPDATE(Precio) )
+        RETURN;
+
 	UPDATE inv
 	SET PrecioDescuento =
 		CASE WHEN i.DescuentoID IS NULL THEN NULL

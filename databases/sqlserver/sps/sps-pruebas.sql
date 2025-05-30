@@ -37,7 +37,7 @@ EXEC sp_aplicarDescuentoAProducto
     @DescuentoID = ,
     @ProductoID  = ;
 
---------------- GESTI�N DE VENTAS ---------------
+--------------- GESTION DE VENTAS ---------------
 -- 1.
 SELECT * FROM COMPRAS 
 SELECT * FROM VENTAS 
@@ -51,8 +51,6 @@ EXEC sp_procesoVenta
   @ProductoID     = 2, 
   @Cantidad       = 1, 
   @PrecioUnitario = 100.00;
-
-
 
 --
 CREATE PROCEDURE sp_

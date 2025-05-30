@@ -1,7 +1,7 @@
 USE Marketplace
 GO
 
--- 1. si sirve
+-- 1.Calcular Stock después de insertar items en la tabla Productos 
 CREATE TRIGGER trg_calcularStockInsertItem
 ON PRODUCTOS
 AFTER INSERT
@@ -15,8 +15,7 @@ BEGIN
 	FROM INVENTARIO inv
 END;
 
-
--- 2. si sirve
+-- 2.Calcular PrecioDescuento después de aplicar un descuento a un Producto
 CREATE TRIGGER trg_calcularPrecioDescuento
 ON INVENTARIO
 AFTER UPDATE
@@ -37,7 +36,7 @@ BEGIN
 	   OR (i.PrecioDescuento IS NOT NULL AND i.Precio <> d.Precio)
 END;
 
--- 3.
+-- 3.Recalcular Stock después de una venta
 CREATE TRIGGER trg_calcularStockAfterVenta
 ON PRODUCTOS
 AFTER UPDATE

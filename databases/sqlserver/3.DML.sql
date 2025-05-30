@@ -1,12 +1,10 @@
 USE Marketplace
 GO
 
-SELECT * FROM CATEGORIAS
 --------------- GESTION DE USUARIOS ---------------
 SELECT * FROM USERS
 SELECT * FROM CLIENTES 
 SELECT * FROM TIENDAS 
--- trigger o sp: REGISTRO NUEVO USUARIO, INICIO SESIÓN USUARIO EXISTENTE
 INSERT INTO USERS(Correo, Password, Tipo)
 VALUES 
 	('cliente1@gmail.com', '123cliente1', 'Cliente'), -- 1
@@ -24,12 +22,10 @@ VALUES
 	(4, 1, 'tiendaTec2', 'tiendaTec2 SA', 222222222, 22222222), -- 2
 	(5, 1, 'tiendaTec3', 'tiendaTec3 SA', 333333333, 33333333); -- 3
 
-SELECT * FROM SUBCATEGORIAS 
---------------- GESTIÓN DE INVENTARIO ---------------
+--------------- GESTIï¿½N DE INVENTARIO ---------------
 SELECT * FROM DESCUENTOS 
 SELECT * FROM INVENTARIO 
 SELECT * FROM PRODUCTOS 
--- trigger o sp: 
 INSERT INTO DESCUENTOS(TiendaID, Nombre, Porcentaje, StartDate)
 VALUES 
 	(1, 'Dia de la Madre', 50, '2025-05-27');
@@ -41,7 +37,7 @@ VALUES
 	(2, 3, 'Laptop1', 200), -- laptops
 	(2, 3, 'Laptop2', 200),
 	(3, 9, 'Televisor1', 300); -- televisores
-INSERT INTO PRODUCTOS(Codigo, ProductoID) -- TRIGGER1: trg_calcularStockInsertItem
+INSERT INTO PRODUCTOS(Codigo, ProductoID)
 VALUES 
 	(111, 1), -- iphone1
 	(112, 1),
@@ -75,14 +71,7 @@ VALUES
 	(314, 6),
 	(315, 6);
 
--- TRIGGER2 : trg_calcularPrecioDescuento
-UPDATE INVENTARIO 
-SET DescuentoID = 1
-WHERE ProductoID = 1
-SELECT * FROM INVENTARIO
-
-SELECT * FROM CLIENTES
---------------- GESTIÓN DE VENTAS ---------------
+--------------- GESTIï¿½N DE VENTAS ---------------
 SELECT * FROM DIRECCIONES 
 SELECT * FROM CLIENTE_DIRECCION 
 INSERT INTO DIRECCIONES(Barrio, Calle, Numero)
@@ -103,7 +92,7 @@ VALUES
 SELECT * FROM COMPRAS 
 SELECT * FROM VENTAS 
 SELECT * FROM DETALLE_VENTA
-SELECT * FROM PRODUCTOS
+select * from PRODUCTOS
 EXEC sp_procesoVenta 
   @ClienteID      = 1, 
   @DireccionID    = 1, 
@@ -113,9 +102,9 @@ EXEC sp_procesoVenta
   @ProductoID     = 2, 
   @Cantidad       = 1, 
   @PrecioUnitario = 100.00;
-INSERT INTO DETALLE_VENTA(VentaID, ItemID)VALUES (2, 8); -- ya no sera necesario, despues de terminar de implementar el sp
+INSERT INTO DETALLE_VENTA(VentaID, ItemID)VALUES (1, 7); -- ya no sera necesario, despues de terminar de implementar el sp
 
---------------- GESTIÓN DE PAGOS ---------------
+--------------- GESTIï¿½N DE PAGOS ---------------
 SELECT * FROM TARJETAS 
 SELECT * FROM CLIENTE_TARJETA 
 SELECT * FROM DATOS_FACTURA 

@@ -2,31 +2,14 @@ USE Marketplace
 GO
 
 --------------- TABLAS FIJAS - CATEGORIAS ---------------
--- 1.Categorias Producto y Tiendas
-CREATE TABLE CATEGORIAS(
-CategoriaID INT       NOT NULL PRIMARY KEY IDENTITY(1,1),
-Nombre NVARCHAR(50)   NOT NULL UNIQUE,
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE()
-);
-
--- 2.Subcategorias Producto
-CREATE TABLE SUBCATEGORIAS(
-SubcategoriaID INT    NOT NULL PRIMARY KEY IDENTITY(1,1),
-CategoriaID INT       NOT NULL,
-Nombre NVARCHAR(50)   NOT NULL,
-ModifiedDate DATETIME NOT NULL DEFAULT GETDATE(),
-FOREIGN KEY (CategoriaID) REFERENCES CATEGORIAS(CategoriaID)
-);
-
---------------- TABLAS FIJAS - CATEGORIAS ---------------
 -- 1.Categorias
 SELECT * FROM CATEGORIAS
 INSERT INTO CATEGORIAS(Nombre)
 VALUES
-	('Tecnología'),
+	('Tecnologï¿½a'),
 	('Ropa y accesorios'),
-	('Hogar y Jardín'),
-	('Electrodomésticos'),
+	('Hogar y Jardï¿½n'),
+	('Electrodomï¿½sticos'),
 	('Cuidado Personal y Belleza'),
 	('Entretenimiento'),
 	('Mascotas'),
@@ -56,29 +39,29 @@ VALUES
 	(2, 'Joyas'),
 	(2, 'Accesorios'),
 	(2, 'Calzados'),
-	(2, 'Trajes de Baño'),
+	(2, 'Trajes de Baï¿½o'),
 	(2, 'Ropa para Mujer'),
 	(2, 'Ropa para Hombre'),
-	(2, 'Ropa para Niños'),
+	(2, 'Ropa para Niï¿½os'),
 	(2, 'Ropa deportiva'),
 	(2, 'Otros'),
 	
 	(3, 'Muebles'),
-	(3, 'Decoración'),
-	(3, 'Jardinería'),
+	(3, 'Decoraciï¿½n'),
+	(3, 'Jardinerï¿½a'),
 	(3, 'Limpieza'),
 	(3, 'Herramientas'),
 	(3, 'Cama y colchones'),
 	(3, 'Otros'),
 
-	(4, 'Climatización'),
+	(4, 'Climatizaciï¿½n'),
 	(4, 'Cocinas y Encimeras'),
-	(4, 'Refrigeración'),
+	(4, 'Refrigeraciï¿½n'),
 	(4, 'Hornos y Microondas'),
 	(4, 'Lavadoras y Secadoras'),
 	(4, 'Extractores'),
-	(4, 'Parrillas Eléctricas'),
-	(4, 'Electrodomésticos Pequeños'),
+	(4, 'Parrillas Elï¿½ctricas'),
+	(4, 'Electrodomï¿½sticos Pequeï¿½os'),
 	(4, 'Otros'),
 
 	(5, 'Cuidado Corporal'),
@@ -94,7 +77,7 @@ VALUES
 	(6, 'Juguetes'),
 	(6, 'Juegos'),
 	(6, 'Videojuegos'),
-	(6, 'Películas'),
+	(6, 'Pelï¿½culas'),
 	(6, 'Libros'),
 	(6, 'Artes y manualidades'),
 	(6, 'Otros'),
@@ -103,10 +86,10 @@ VALUES
 	(7, 'Alimento'),
 	(7, 'Higiene'),
 	(7, 'Ropa'),
-	(7, 'Otros artículos'),
+	(7, 'Otros artï¿½culos'),
 
 	(8, 'Suministros de oficina'),
-	(8, 'Decoración de eventos'),
-	(8, 'Equipamiento Médico'),
+	(8, 'Decoraciï¿½n de eventos'),
+	(8, 'Equipamiento Mï¿½dico'),
 	(8, 'Otros');
 GO

@@ -49,6 +49,7 @@ SELECT * FROM INVENTARIO
 SELECT * FROM COMPRAS 
 SELECT * FROM VENTAS 
 SELECT * FROM DETALLE_VENTA
+SELECT * FROM PAGOS 
 
 SELECT * FROM PRODUCTOS
 EXEC sp_procesoVenta 
@@ -66,68 +67,28 @@ EXEC sp_procesoVenta
 SELECT * FROM INVENTARIO
 SELECT * FROM PRODUCTOS
 
-
-
-DECLARE @ItemsCarrito dbo.TablaItems;
-INSERT INTO @ItemsCarrito (ProductoID, Cantidad, PrecioUnitario) VALUES
-	(, , ),
-	(, , ),
-	(, , );
-EXEC usp_procesoVenta
-	@ClienteID		= 1,
-	@DireccionID	= 1,
-	@FacturaID		= 1,
-	@MetodoPago		= 'Efectivo',
-	@TarjetaID		= NULL,
-	@Items          = @ItemsCarrito,
-	@Subtotal		= 50,
-	@ServiceFee		= 5,
-	@Total			= 55;
-
+-- 2.
+SELECT * FROM DIRECCIONES 
+EXEC sp_registrarDireccion
+@ClienteID = 1,
+@Barrio    = 'barrio sp',
+@Calle     = 'calle sp',
+@Numero    = 123;
 
 --------------- GESTION DE PAGOS ---------------
 -- 1.
-SELECT * FROM DIRECCIONES 
-EXEC sp_registrarDireccion
-@ClienteID = ,
-@Barrito ,
-@Calle ,
-@Numero 
-
--- 2.
 SELECT * FROM TARJETAS 
 EXEC sp_registrarTarjeta
-@ClienteID =,
-@Red,
-@NombreTitular,
-@Numero,
-@CVC,
-@ExpDate
+@ClienteID     = 1,
+@Red           = 'Visa',
+@NombreTitular = 'Tarjeta3Cliente1-sp',
+@Numero        = 1234123412341236,
+@CVC           = 125,
+@ExpDate       = '2025-08-01';
 
--- 3.
+-- 2.
 SELECT * FROM DATOS_FACTURA 
 EXEC sp_registrarDatosFactura
-@ClienteID = ,
-@RazonSocial ,
-@NitCi 
-
-
---
-CREATE PROCEDURE sp_
-@
-AS
-BEGIN
-	BEGIN TRY
-	BEGIN TRANSACTION
-		IF ()
-		BEGIN
-			THROW 50005, '', 1;
-		END
-		COMMIT TRANSACTION;
-	END TRY
-	BEGIN CATCH
-		IF XACT_STATE() <> 0
-            ROLLBACK TRANSACTION;
-        THROW;	
-	END CATCH
-END;
+@ClienteID   = 1,
+@RazonSocial = 'Cliente1Factura2-sp',
+@NitCi       = 3333333;

@@ -83,16 +83,21 @@ VALUES
 SELECT * FROM COMPRAS 
 SELECT * FROM VENTAS 
 SELECT * FROM DETALLE_VENTA
+select * from INVENTARIO
 select * from PRODUCTOS
+
 EXEC sp_procesoVenta 
-  @ClienteID      = 1, 
-  @DireccionID    = 1, 
-  @Subtotal       = 100.00, 
-  @ServiceFee     = 5.00, 
-  @Total          = 105.00, 
-  @ProductoID     = 2, 
-  @Cantidad       = 1, 
-  @PrecioUnitario = 100.00;
+	@ClienteID		= 1,
+	@DireccionID	= 1,
+	@FacturaID		= 1,
+	@MetodoPago		= 'Tarjeta',
+	@TarjetaID		= 1,
+	@ProductoID		= 3,
+	@Cantidad       = 1,
+	@PrecioUnitario = 200,
+	@Subtotal		= 200,
+	@ServiceFee		= 5,
+	@Total			= 205;
 
 --------------- GESTIÓN DE PAGOS ---------------
 SELECT * FROM TARJETAS 

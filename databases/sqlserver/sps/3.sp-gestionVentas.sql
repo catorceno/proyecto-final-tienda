@@ -2,8 +2,7 @@ USE Tienda
 GO
 
 -- 1.
-
-ALTER PROCEDURE sp_procesoVenta
+CREATE PROCEDURE sp_procesoVenta
 @ClienteID      INT,
 @DireccionID    INT,
 @FacturaID      INT,
@@ -57,8 +56,14 @@ BEGIN
 	END CATCH
 END;
 
+
+
+
+
+
+
+
 -- para varios productos diferentes
--- En tu base de datos Tienda:
 CREATE TYPE dbo.TablaItems AS TABLE
 (
     ProductoID      INT         NOT NULL,
@@ -112,24 +117,23 @@ BEGIN
         END
 END
 
--- 2.
-CREATE PROCEDURE sp_registrarNuevaDireccion
-@ClienteID INT,
-@Barrio NVARCHAR(50),
-@Calle NVARCHAR(50),
-@Numero INT
-BEGIN
-	BEGIN TRY
-	BEGIN TRANSACTION
-		INSERT INTO DIRECCIONES(Barrio, Calle, Numero)
-		VALUES(@Barrio, @Calle, @Numero);
-		
-		COMMIT TRANSACTION;
-	END TRY
-	BEGIN CATCH
-        ROLLBACK TRANSACTION;
-	END CATCH
-END;
+DECLARE @ItemsCarrito dbo.TablaItems;
+INSERT INTO @ItemsCarrito (ProductoID, Cantidad, PrecioUnitario) VALUES
+	(, , ),
+	(, , ),
+	(, , );
+EXEC usp_procesoVenta
+	@ClienteID		= 1,
+	@DireccionID	= 1,
+	@FacturaID		= 1,
+	@MetodoPago		= 'Efectivo',
+	@TarjetaID		= NULL,
+	@Items          = @ItemsCarrito,
+	@Subtotal		= 50,
+	@ServiceFee		= 5,
+	@Total			= 55;
+
+
 
 /*
 sp: sp_ (entradas desde el backend:

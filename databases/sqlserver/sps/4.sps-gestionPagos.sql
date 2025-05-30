@@ -24,7 +24,7 @@ BEGIN
 		END
 		
 		INSERT INTO DIRECCIONES(ClienteID, Barrio, Calle, Numero)
-		VALUES (@ClienteID, @Barrio, @Calle, @Numero, @Numero);
+		VALUES (@ClienteID, @Barrio, @Calle, @Numero);
 
 		COMMIT TRANSACTION;
 	END TRY
@@ -68,7 +68,6 @@ BEGIN
         THROW;	
 	END CATCH
 END;
-
 
 -- 3.
 CREATE PROCEDURE sp_registrarDatosFactura

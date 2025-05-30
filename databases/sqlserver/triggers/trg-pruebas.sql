@@ -1,7 +1,7 @@
 USE Tienda
 GO
 
---------------- GESTI�N DE INVENTARIO ---------------
+--------------- GESTIÓN DE INVENTARIO ---------------
 -- 1.trg_calcularStockInsertItem
 SELECT * FROM INVENTARIO 
 SELECT * FROM PRODUCTOS
@@ -22,7 +22,7 @@ UPDATE PRODUCTOS
 SET Estado = 'Vendido'
 WHERE ItemID = 1
 
---------------- GESTI�N DE VENTAS ---------------
+--------------- GESTIÓN DE VENTAS ---------------
 -- 1.trg_cambiarItemAVendido
 SELECT * FROM VENTAS
 SELECT * FROM DETALLE_VENTA

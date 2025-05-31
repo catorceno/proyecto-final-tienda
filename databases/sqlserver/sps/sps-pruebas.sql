@@ -58,12 +58,12 @@ EXEC sp_procesoVenta
 	@FacturaID		= 1,
 	@MetodoPago		= 'Efectivo',
 	@TarjetaID		= NULL,
-	@ProductoID		= 1,
+	@ProductoID		= 8,
 	@Cantidad       = 1,
-	@PrecioUnitario = 50,
-	@Subtotal		= 50,
+	@PrecioUnitario = 100,
+	@Subtotal		= 100,
 	@ServiceFee		= 5,
-	@Total			= 55;
+	@Total			= 105;
 SELECT * FROM INVENTARIO
 SELECT * FROM PRODUCTOS
 
@@ -92,3 +92,10 @@ EXEC sp_registrarDatosFactura
 @ClienteID   = 1,
 @RazonSocial = 'Cliente1Factura2-sp',
 @NitCi       = 3333333;
+
+--------------- OTROS ---------------
+-- 1.
+EXEC sp_productosDeUnaTienda @TiendaID = 1;
+
+-- 2.
+EXEC sp_ventasDeUnaTienda  @TiendaID = 1;

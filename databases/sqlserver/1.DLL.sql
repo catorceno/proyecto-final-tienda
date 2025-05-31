@@ -92,6 +92,12 @@ CONSTRAINT chk_PrecioInventario CHECK(Precio > 0),
 CONSTRAINT chk_StockInventario  CHECK(Stock >= 0)
 );
 
+SELECT name
+FROM sys.key_constraints
+WHERE [type] = 'UQ' AND parent_object_id = OBJECT_ID('INVENTARIO');
+ALTER TABLE INVENTARIO
+DROP CONSTRAINT UQ__INVENTAR__75E3EFCFD6F0F50B;
+
 -- 8.Productos
 CREATE TABLE PRODUCTOS(
 ItemID		 INT          NOT NULL PRIMARY KEY IDENTITY(1,1),

@@ -80,10 +80,12 @@ ProductoID		INT			  NOT NULL PRIMARY KEY IDENTITY(1,1),
 TiendaID		INT			  NOT NULL,
 SubcategoriaID  INT			  NOT NULL,
 DescuentoID		INT			  NULL,
-Nombre			NVARCHAR(50)  NOT NULL UNIQUE,
+Nombre			NVARCHAR(50)  NOT NULL,
 Precio			DECIMAL(20,2) NOT NULL,
+Descripcion     NVARCHAR(200), -- agregar
 PrecioDescuento DECIMAL(20,2),
 Stock			INT DEFAULT(0),
+Estado          NVARCHAR(20) DEFAULT 'Disponible', -- agregar
 ModifiedDate	DATETIME	  NOT NULL DEFAULT GETDATE(),
 FOREIGN KEY (TiendaID)       REFERENCES TIENDAS(TiendaID),
 FOREIGN KEY (DescuentoID)    REFERENCES DESCUENTOS(DescuentoID),
@@ -91,12 +93,6 @@ FOREIGN KEY (SubcategoriaID) REFERENCES SUBCATEGORIAS(SubcategoriaID),
 CONSTRAINT chk_PrecioInventario CHECK(Precio > 0),
 CONSTRAINT chk_StockInventario  CHECK(Stock >= 0)
 );
-
-SELECT name
-FROM sys.key_constraints
-WHERE [type] = 'UQ' AND parent_object_id = OBJECT_ID('INVENTARIO');
-ALTER TABLE INVENTARIO
-DROP CONSTRAINT UQ__INVENTAR__75E3EFCFD6F0F50B;
 
 -- 8.Productos
 CREATE TABLE PRODUCTOS(

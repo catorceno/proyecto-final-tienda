@@ -100,3 +100,28 @@ BEGIN
         THROW;	
 	END CATCH
 END;
+
+-- 4.Ver Perfil de un Usuario
+CREATE PROCEDURE sp_perfilUsuario
+@UserID INT
+AS
+BEGIN
+	IF((
+		select tipo
+		from USERS
+		where UserID = @UserID
+	) = 'Cliente')
+	BEGIN
+		select u.Correo, Nombre, Apellido, Telefono
+		from CLIENTES c
+		inner join users u on c.UserID = u.UserID
+		where u.UserID = @UserID
+	END
+	ELSE
+	BEGIN
+		select u.Correo, Nombre, NombreJuridico, NIT, Telefono
+		from TIENDAS t
+		inner join USERS u on t.UserID = u.UserID
+		where u.UserID = @UserID
+	END
+END

@@ -68,33 +68,3 @@ BEGIN
         THROW;	
 	END CATCH
 END;
-
--- 3.
-CREATE PROCEDURE sp_registrarDatosFactura
-@ClienteID   INT,
-@RazonSocial NVARCHAR(50),
-@NitCi       INT
-AS
-BEGIN
-	BEGIN TRY
-	BEGIN TRANSACTION
-		IF EXISTS(
-			SELECT 1
-			FROM DATOS_FACTURA
-			WHERE ClienteID = @ClienteID AND NitCi = @NitCi AND RazonSocial = @RazonSocial
-		)
-		BEGIN
-			THROW 50005, 'Estos datos de factura ya existen.', 1;
-		END
-
-		INSERT INTO DATOS_FACTURA(ClienteID, RazonSocial, NitCi)
-		VALUES (@ClienteID, @RazonSocial, @NitCi);
-
-		COMMIT TRANSACTION;
-	END TRY
-	BEGIN CATCH
-		IF XACT_STATE() <> 0
-            ROLLBACK TRANSACTION;
-        THROW;	
-	END CATCH
-END;

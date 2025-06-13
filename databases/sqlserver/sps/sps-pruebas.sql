@@ -34,9 +34,33 @@ EXEC sp_inicioSesion
 -- 1.
 SELECT * FROM INVENTARIO
 EXEC sp_aplicarDescuentoAProducto
-    @TiendaID    = 1,
     @DescuentoID = 1,
     @ProductoID  = 3;
+--------------- CRUD INVENTARIO ---------------
+-- 2.
+EXEC sp_registrarProducto
+@TiendaID       ,
+@SubcategoriaID ,
+@Nombre         ,
+@Precio         ,
+@Descripcion    
+
+-- 3.
+EXEC sp_editarProducto
+@ProductoID     INT,
+@SubcategoriaID INT,
+@Nombre         NVARCHAR(50),
+@Precio         DECIMAL(20,2),
+@Descripcion    NVARCHAR(200),
+@DescuentoID    INT
+
+-- 4.
+EXEC sp_eliminarProducto
+@TiendaID   = 1,
+@ProductoID = 1
+
+-- 5.
+EXEC sp_verInventario @TiendaID = 2;
 
 --------------- GESTION DE VENTAS ---------------
 -- 1.
@@ -86,16 +110,20 @@ EXEC sp_registrarTarjeta
 @CVC           = 125,
 @ExpDate       = '2025-08-01';
 
--- 2.
+--------------- CRUD DATOS FACTURA ---------------
+-- 1.
 SELECT * FROM DATOS_FACTURA 
 EXEC sp_registrarDatosFactura
 @ClienteID   = 1,
 @RazonSocial = 'Cliente1Factura2-sp',
 @NitCi       = 3333333;
 
+-- 2.
+EXEC sp_editarDatosFactura
+@FacturaID   = 2,
+@RazonSocial = 'Cliente1Factura2-sp-editar',
+@NitCi       = 3333333;
+
 --------------- OTROS ---------------
 -- 1.
-EXEC sp_productosDeUnaTienda @TiendaID = 1;
-
--- 2.
-EXEC sp_ventasDeUnaTienda  @TiendaID = 1;
+EXEC sp_verVentas  @TiendaID = 1;

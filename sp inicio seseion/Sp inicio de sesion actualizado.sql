@@ -3,14 +3,14 @@ select * from USERS
 
 create or alter procedure sp_InicioSesion
 	@Correo nvarchar(200),
-	@Password int
+	@Password nvarchar(250)
 as 
 begin 
 	set nocount on;
 	begin try
 		if not exists(select 1 from USERS where Correo = @Correo and Password = @Password)
 		begin 
-			throw 50001, 'Correo o Contraseña incorrectos ', 1;
+			throw 50001, 'Correo o ContraseÃ±a incorrectos ', 1;
 		end
 
 		if exists (select 1 from USERS where Correo = @Correo and Estado = 'Inactivo')
